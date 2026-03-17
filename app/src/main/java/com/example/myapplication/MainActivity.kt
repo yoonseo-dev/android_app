@@ -9,16 +9,20 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.myapplication.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // 1. 시스템 프레임워크가 강제로 생성한 ActionBar의 참조(Reference)를 획득하여 제어
         // 기본 테마가 NoActionBar인 경우 null을 반환하므로 안전한 호출(?.) 필수
-        supportActionBar?.title = "안드로이드앱개발"
-        supportActionBar?.subtitle = "송윤서"
+        setSupportActionBar(binding.myToolbar)
+        supportActionBar?.title = "커스텀 Toolbar 위젯"
         // ==
         //val actionbar = getSupportActionBar()
         //actionBar?.setTitle("안드로이드앱개발") => 이 방식도 가능함
@@ -33,17 +37,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     // 3. 인플레이트된 뷰들의 클릭 이벤트 라우팅
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_share -> {
-                Toast.makeText(this, "공유 로직 수행", Toast.LENGTH_SHORT).show()
-                true // 이벤트가 소비(Consumed)되었음을 시스템에 반환
-            }
-            R.id.action_delete -> {
-                Toast.makeText(this, "삭제 로직 수행", Toast.LENGTH_SHORT).show()
-                true // 이벤트가 소비(Consumed)되었음을 시스템에 반환
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        return when (item.itemId) {
+//            R.id.action_share -> {
+//                Toast.makeText(this, "공유 로직 수행", Toast.LENGTH_SHORT).show()
+//                true // 이벤트가 소비(Consumed)되었음을 시스템에 반환
+//            }
+//            R.id.action_delete -> {
+//                Toast.makeText(this, "삭제 로직 수행", Toast.LENGTH_SHORT).show()
+//                true // 이벤트가 소비(Consumed)되었음을 시스템에 반환
+//            }
+//            else -> super.onOptionsItemSelected(item)
+//        }
+//    }
 }
