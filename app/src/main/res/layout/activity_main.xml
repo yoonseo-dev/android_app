@@ -1,41 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true">
-
-    <!--[핵심] ScrollView의 유일한 직계 자식인 컨테이너 -->
-    <LinearLayout
-        android:id="@+id/llContentContainer"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="vertical">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="이용약관 동의"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="연락처 목록 (RecyclerView)"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:background="#333333"
+        android:textColor="#ffffff" />
 
-        <!--정적인 텍스트 컨텐츠-->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="제 1조 (목적)\n이 약관은...(생략)"
-            android:lineSpacingExtra="8dp" />
+    <!--정적인 텍스트 컨텐츠-->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvContacts"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
-        <!--메모리 누수 테스트용 버튼-->
-        <Button
-            android:id="@+id/btnCrashTest"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:layout_marginBottom="16dp"
-            android:text="10,000개 이미지 로드 (OOM 테스트)"
-            android:backgroundTint="#D32F2F" />
-
-    </LinearLayout>
-</ScrollView>
+</LinearLayout>

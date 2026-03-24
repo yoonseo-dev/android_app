@@ -1,89 +1,34 @@
 package com.example.myapplication
 
-import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.TextView
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.util.TypedValue
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.ViewParent
-import android.widget.BaseAdapter
-import android.widget.ListView
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.databinding.ActivityMainBinding
 
-data class Contact(val name:String, val phone: String)
-
-class MultiTypeAdapter(private val context: Context, private val dataList: List<Contact>) :
-    BaseAdapter(){
-    override fun getViewTypeCount(): Int = 3
-
-    override fun getItemViewType(position: Int): Int {
-        return position % 3
-    }
-
-    override fun getCount(): Int = dataList.size
-
-    override fun getItem(position: Int): Any = dataList[position]
-
-    override fun getItemId(position: Int): Long = position.toLong()
-
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val viewType = getItemViewType(position)
-        var view = convertView
-
-        if(view==null){
-            val inflater = LayoutInflater.from(context)
-
-            view = when(viewType){
-                0 -> inflater.inflate(R.layout.item_simple, parent, false)
-                1 -> inflater.inflate(R.layout.item_product, parent, false)
-                else -> inflater.inflate(R.layout.item_feed, parent, false)
-            }
-        }
-
-        val contact = dataList[position]
-
-        when(viewType){
-            0 -> {
-                val tvName = view!!.findViewById<TextView>(R.id.tvName)
-                val tvPhone = view.findViewById<TextView>(R.id.tvPhone)
-                tvName.text = contact.name
-                tvPhone.text = contact.phone
-            }
-            1 -> {
-                val tvTitle = view!!.findViewById<TextView>(R.id.tvTitle)
-                val tvPrice = view.findViewById<TextView>(R.id.tvPrice)
-                tvTitle.text = "[상품] " + contact.name
-                tvPrice.text = "가격: 10,000원"
-            }
-            2 -> {
-                val tvAuthorName = view!!.findViewById<TextView>(R.id.tvAuthorName)
-                val tvBody = view.findViewById<TextView>(R.id.tvBody)
-                tvAuthorName.text = contact.name
-                tvBody.text = "연락처: ${contact.phone}"
-            }
-        }
-        return view!!
-    }
-}
-
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // XML에 선언된 ListView 객체 생성
-        val listView = ListView(this)
-        setContentView(listView)
+        // 1. 출력할 1,000개의 대용량 더미(Dummy) 데이터 컬렉션 생성
+        // (실제 앱에서는 Retrofit 네트워크 통신이나 Room DB에서 데이터를 가져옵니다)
+        val dummyData = mutableListOf<ContactData>()
+        for (i in 1..1000) {
+            dummyData.add(ContactData("학생 $i", "010-1234-${String.format("%04d", i)}"))
+        }
 
-        // 대량의 더미 데이터 생성
-        val dummyData = (1..1000).map { Contact("학생 $it", "010-0000-${String.format("%04d", it)}") }
+        // 2. 어댑터 인스턴스 생성 및 데이터 소스 주입
+        val adapter = ContactAdapter(dummyData)
 
-        // 어댑터 연결 (멀티 뷰 타입 어댑터)
-        val adapter = MultiTypeAdapter(this, dummyData)
-        listView.adapter = adapter
+        // 3. RecyclerView 아키텍처 조립 (중요)
+        binding.rvContacts.adapter = adapter
+
+        // 4. LayoutManager 지정 (필수 설정)
+        // 기본 1차원 선형 나열 (수직 스크롤)
+        binding.rvContacts.layoutManager = LinearLayoutManager(this)
     }
 }
