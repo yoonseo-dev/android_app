@@ -1,18 +1,15 @@
 package com.example.myapplication
 
-import android.content.Intent
-import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import android.os.Bundle
+import android.widget.TextView
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.util.TypedValue
 import com.example.myapplication.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,59 +17,36 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 1. 시스템 프레임워크가 강제로 생성한 ActionBar의 참조(Reference)를 획득하여 제어
-        // 기본 테마가 NoActionBar인 경우 null을 반환하므로 안전한 호출(?.) 필수
-        setSupportActionBar(binding.myToolbar)
-        supportActionBar?.title = "Navigation 아키텍처"
-        supportActionBar?.subtitle = "송윤서"
+        populateScrollView()
+    }
 
-        val toggle = ActionBarDrawerToggle(
-            this,
-            binding.drawerLayout,
-            binding.myToolbar,
-            R.string.nav_open,
-            R.string.nav_close
-        )
-
-        binding.drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
-
-        binding.navigationView.setNavigationItemSelectedListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.nav_home -> Toast.makeText(this, "메인 화면 트랜지션 실행", Toast.LENGTH_SHORT).show()
-                R.id.nav_profile -> Toast.makeText(this, "프로필 뷰로 교체", Toast.LENGTH_SHORT).show()
+    private fun populateScrollView() {
+        // 100개의 데이터를 수신했다고 가정합니다.
+        for (i in 1..100) {
+            // 1. 메모리에 새로운 TextView 인스턴스 할당
+            val dynamicTextView = TextView(this).apply {
+                text = "${i}번째 동적 데이터 블록입니다."
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+                setPadding(0, 24, 0, 24)
             }
 
-            binding.drawerLayout.closeDrawers()
-            true
+            // 2. ScrollView의 컨테이너(LinearLayout)에 뷰를 부착(Attach)
+            binding.llContentContainer.addView(dynamicTextView)
         }
 
-        // ==
-        //val actionbar = getSupportActionBar()
-        //actionBar?.setTitle("안드로이드앱개발") => 이 방식도 가능함
-
+        // OOM(Out of Memory) 테스트 이벤트
+        binding.btnCrashTest.setOnClickListener {
+            // 대규모 이미지를 반복 생성하여 메모리 임계값을 초과시킵니다.
+            for (i in 1..10000) {
+                val imageView = ImageView(this).apply {
+                    setImageResource(android.R.mipmap.sym_def_app_icon)
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        300 // 고정 높이 지정
+                    )
+                }
+                binding.llContentContainer.addView(imageView)
+            }
+        }
     }
 }
-
-//    // 2. 시스템 액션바 영역에 메뉴를 인플레이트
-//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-//
-//        menuInflater.inflate(R.menu.menu_main, menu)
-//        return true // 이벤트 체인에 메뉴가 생성되었음을 알림
-//    }
-//
-//    // 3. 인플레이트된 뷰들의 클릭 이벤트 라우팅
-//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//        return when (item.itemId) {
-////            R.id.action_share -> {
-////                Toast.makeText(this, "공유 로직 수행", Toast.LENGTH_SHORT).show()
-////                true // 이벤트가 소비(Consumed)되었음을 시스템에 반환
-////            }
-//            R.id.action_delete -> {
-//                Toast.makeText(this, "삭제 로직 수행", Toast.LENGTH_SHORT).show()
-//                true // 이벤트가 소비(Consumed)되었음을 시스템에 반환
-//            }
-//            else -> super.onOptionsItemSelected(item)
-//        }
-//    }
-//}
