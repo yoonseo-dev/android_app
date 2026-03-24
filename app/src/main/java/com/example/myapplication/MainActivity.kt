@@ -1,52 +1,89 @@
 package com.example.myapplication
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.util.TypedValue
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewParent
+import android.widget.BaseAdapter
+import android.widget.ListView
 import com.example.myapplication.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity() {
+data class Contact(val name:String, val phone: String)
 
-    private lateinit var binding: ActivityMainBinding
+class MultiTypeAdapter(private val context: Context, private val dataList: List<Contact>) :
+    BaseAdapter(){
+    override fun getViewTypeCount(): Int = 3
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        populateScrollView()
+    override fun getItemViewType(position: Int): Int {
+        return position % 3
     }
 
-    private fun populateScrollView() {
-        // 100개의 데이터를 수신했다고 가정합니다.
-        for (i in 1..100) {
-            // 1. 메모리에 새로운 TextView 인스턴스 할당
-            val dynamicTextView = TextView(this).apply {
-                text = "${i}번째 동적 데이터 블록입니다."
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
-                setPadding(0, 24, 0, 24)
-            }
+    override fun getCount(): Int = dataList.size
 
-            // 2. ScrollView의 컨테이너(LinearLayout)에 뷰를 부착(Attach)
-            binding.llContentContainer.addView(dynamicTextView)
-        }
+    override fun getItem(position: Int): Any = dataList[position]
 
-        // OOM(Out of Memory) 테스트 이벤트
-        binding.btnCrashTest.setOnClickListener {
-            // 대규모 이미지를 반복 생성하여 메모리 임계값을 초과시킵니다.
-            for (i in 1..10000) {
-                val imageView = ImageView(this).apply {
-                    setImageResource(android.R.mipmap.sym_def_app_icon)
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        300 // 고정 높이 지정
-                    )
-                }
-                binding.llContentContainer.addView(imageView)
+    override fun getItemId(position: Int): Long = position.toLong()
+
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+        val viewType = getItemViewType(position)
+        var view = convertView
+
+        if(view==null){
+            val inflater = LayoutInflater.from(context)
+
+            view = when(viewType){
+                0 -> inflater.inflate(R.layout.item_simple, parent, false)
+                1 -> inflater.inflate(R.layout.item_product, parent, false)
+                else -> inflater.inflate(R.layout.item_feed, parent, false)
             }
         }
+
+        val contact = dataList[position]
+
+        when(viewType){
+            0 -> {
+                val tvName = view!!.findViewById<TextView>(R.id.tvName)
+                val tvPhone = view.findViewById<TextView>(R.id.tvPhone)
+                tvName.text = contact.name
+                tvPhone.text = contact.phone
+            }
+            1 -> {
+                val tvTitle = view!!.findViewById<TextView>(R.id.tvTitle)
+                val tvPrice = view.findViewById<TextView>(R.id.tvPrice)
+                tvTitle.text = "[상품] " + contact.name
+                tvPrice.text = "가격: 10,000원"
+            }
+            2 -> {
+                val tvAuthorName = view!!.findViewById<TextView>(R.id.tvAuthorName)
+                val tvBody = view.findViewById<TextView>(R.id.tvBody)
+                tvAuthorName.text = contact.name
+                tvBody.text = "연락처: ${contact.phone}"
+            }
+        }
+        return view!!
+    }
+}
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // XML에 선언된 ListView 객체 생성
+        val listView = ListView(this)
+        setContentView(listView)
+
+        // 대량의 더미 데이터 생성
+        val dummyData = (1..1000).map { Contact("학생 $it", "010-0000-${String.format("%04d", it)}") }
+
+        // 어댑터 연결 (멀티 뷰 타입 어댑터)
+        val adapter = MultiTypeAdapter(this, dummyData)
+        listView.adapter = adapter
     }
 }
