@@ -10,13 +10,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.databinding.ActivityMainBinding
 import com.example.myapplication.databinding.ItemSimpleGridBinding
 
+// 1. 데이터 객체를 보관할 ViewHolder 정의
 class SimpleGridViewHolder(val binding: ItemSimpleGridBinding) : RecyclerView.ViewHolder(binding.root)
 
-class SimpleGridAdapter(private val dataList: List<String>) : RecyclerView.Adapter<SimpleGridViewHolder>(){
+// 2. 어댑터 정의
+class SimpleGridAdapter(private val dataList: List<String>) : RecyclerView.Adapter<SimpleGridViewHolder>() {
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SimpleGridViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val binding = ItemSimpleGridBinding.inflate(inflater, parent, false)
-
         return SimpleGridViewHolder(binding)
     }
 
@@ -26,8 +28,9 @@ class SimpleGridAdapter(private val dataList: List<String>) : RecyclerView.Adapt
 
     override fun getItemCount(): Int = dataList.size
 }
-class MainActivity : AppCompatActivity() {
 
+
+class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,22 +38,39 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 1. 출력할 1,000개의 대용량 더미(Dummy) 데이터 컬렉션 생성
-        // (실제 앱에서는 Retrofit 네트워크 통신이나 Room DB에서 데이터를 가져옵니다)
         val items = mutableListOf<String>()
-        for (i in 1..60) {
-            items.add("항목 $i")
+        for (i in 1..100) {
+            items.add("반응형 $i")
         }
 
-        // 2. 어댑터 인스턴스 생성 및 데이터 소스 주입
         val adapter = SimpleGridAdapter(items)
-
-        // 3. RecyclerView 아키텍처 조립 (중요)
         binding.rvSimpleGrid.adapter = adapter
 
-        // 4. LayoutManager 지정 (필수 설정)
-        // 기본 1차원 선형 나열 (수직 스크롤)
-        val layoutManager = GridLayoutManager(this, 3)
-        binding.rvSimpleGrid.layoutManager = layoutManager
+        //동적 SpanCount 산출 함수 호출
+        val optimalSpanCount = calculateOptimalSpanCount()
+
+        //도출된 최적의 열 개수를 매니저에 주입
+        val responsiveManager = GridLayoutManager(this, optimalSpanCount)
+        binding.rvSimpleGrid.layoutManager = responsiveManager
+    }
+
+    /**
+     * 디바이스의 물리적 디스플레이 너비를 측정하여
+     * 아이템당 최소 권장 너비(120dp)를 보장하는 최대 열 개수를 수학적으로 산출합니다.
+     */
+    private fun calculateOptimalSpanCount(): Int {
+        val displayMetrics = resources.displayMetrics
+
+        //픽셀 단위인 화면 너비를 기기 밀도로 나누어 논리적 픽셀로 변환
+        val screenwidthDp = displayMetrics.widthPixels / displayMetrics.density
+
+        //한 아이템이 차지해야 할 최소 너비를 120dp로 설정
+        val minimumItemWidthDp = 120
+
+        //전체 너비를 아이템 너비로 나누어 화면에 들어갈 수 있는 열 개수를 계산
+        val spanCount = (screenwidthDp / minimumItemWidthDp).toInt()
+
+        //화면이 아무리 좁앋 최소 2열은 보장하도록 강제
+        return spanCount.coerceAtLeast(2)
     }
 }
